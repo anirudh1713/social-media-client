@@ -8,6 +8,7 @@ import Signin from "./Containers/Auth/Signin";
 import Feed from "./Containers/Feed/Feed";
 import NavBar from "./Components/NavBar";
 import * as actionTypes from './store/actions/actionTypes';
+import * as actions from './store/actions/index';
 
 const App = (props) => {
   const { onAutoSignin } = props;
@@ -19,9 +20,13 @@ const App = (props) => {
     }
   }, [onAutoSignin]);
 
+  const onLogoutHandler = () => {
+    props.onLogout(props.token);
+  };
+
   return (
     <React.Fragment>
-      { props.token ? <NavBar /> : null }
+      { props.token ? <NavBar logOutHandler={onLogoutHandler} /> : null }
       <Switch>
         <Route path={'/signup'} component={Signup} />
         <Route path={'/signin'} component={Signin} />
@@ -42,7 +47,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
   return {
-    onAutoSignin: (token, userId) => dispatch({ type: actionTypes.ON_AUTH_SUCCESS, token, userId })
+    onAutoSignin: (token, userId) => dispatch({ type: actionTypes.ON_AUTH_SUCCESS, token, userId }),
+    onLogout: (token) => dispatch(actions.logout(token))
   }
 }
 

@@ -28,6 +28,17 @@ const store = (state = initialState, action) => {
         loading: false,
         error: action.error
       }
+    case actionTypes.ON_LOGOUT_SUCCESS:
+      return {
+        ...state,
+        token: null,
+        userId: null
+      }
+    case actionTypes.ON_LOGOUT_FAIL:
+      return {
+        ...state,
+        error: action.error
+      }
     default:
       return state;
   }
