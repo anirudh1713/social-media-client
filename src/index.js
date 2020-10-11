@@ -10,9 +10,15 @@ import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 
 import authReducer from './store/reducers/auth';
+import profileReducer from './store/reducers/profile';
+import postsReducer from './store/reducers/posts';
+import friendsReducer from './store/reducers/friends';
 
 const rootReducer = combineReducers({
-  auth: authReducer
+  auth: authReducer,
+  profile: profileReducer,
+  posts: postsReducer,
+  friends: friendsReducer
 });
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

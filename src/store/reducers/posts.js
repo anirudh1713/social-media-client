@@ -1,0 +1,202 @@
+import * as actionTypes from '../actions/actionTypes';
+
+const initialState = {
+  posts: null,
+  loading: false,
+  addPostLoading: false,
+  addPostError: null,
+  error: null,
+  postComplete: false,
+  likeError: null,
+  commentLoading: false,
+  commentError: null
+};
+
+const updatedArr = (arr) => {
+  return arr.map(item => {
+    return {
+      ...item,
+      likes: [...item.likes],
+      dislikes: [...item.dislikes],
+      comments: item.comments.map(comment => {
+        return {
+          ...comment,
+          user: {
+            ...comment.user
+          }
+        };
+      }),
+      user: {
+        ...item.user
+      }
+    };
+  });
+};
+
+const reducer = (state = initialState, action) => {
+  switch (action.type) {
+    case actionTypes.ON_POST_LOAD_START:
+      return {
+        ...state,
+        loading: true,
+        error: null
+      };
+    case actionTypes.ON_POST_LOAD_SUCCESS:
+      return {
+        ...state,
+        posts: action.posts,
+        loading: false,
+        error: null
+      };
+    case actionTypes.ON_POST_LOAD_FAIL:
+      return {
+        ...state,
+        loading: false,
+        error: action.error
+      };
+    case actionTypes.ON_ADD_POST_START:
+      return {
+        ...state,
+        posts: updatedArr(state.posts),
+        addPostLoading: true,
+        addPostError: null
+      };
+    case actionTypes.ON_ADD_POST_SUCCESS:
+      return {
+        ...state,
+        posts: updatedArr(state.posts).concat(action.post),
+        addPostLoading: false,
+        addPostError: null
+      };
+    case actionTypes.ON_ADD_POST_FAIL:
+      return {
+        ...state,
+        posts: updatedArr(state.posts),
+        addPostError: action.error,
+        addPostLoading: false
+      };
+    case actionTypes.ON_LIKE_SUCCESS:
+      return {
+        ...state,
+        posts: state.posts.map(post => {
+          if (post.post_id === action.post.post_id) {
+            post.likes = [...action.post.likes];
+            post.dislikes = [...action.post.dislikes];
+          }
+          return post;
+        }),
+        likeError: null
+      };
+    case actionTypes.ON_LIKE_FAIL:
+      return {
+        ...state,
+        post: updatedArr(state.posts),
+        likeError: action.error
+      };
+    case actionTypes.ON_DISLIKE_SUCCESS:
+      return {
+        ...state,
+        posts: state.posts.map(post => {
+          if (post.post_id === action.post.post_id) {
+            post.likes = [...action.post.likes];
+            post.dislikes = [...action.post.dislikes];
+          }
+          return post;
+        }),
+        likeError: null
+      };
+    case actionTypes.ON_DISLIKE_FAIL:
+      return {
+        ...state,
+        posts: updatedArr(state.posts),
+        likeError: action.error
+      };
+    case actionTypes.ON_DELETE_POST_START:
+      return {
+        ...state,
+        posts: updatedArr(state.posts),
+        loading: true,
+        error: null
+      };
+    case actionTypes.ON_DELETE_POST_SUCCESS:
+      debugger
+      const updatedPosts = state.posts.filter(post => {
+        return post.post_id !== action.postId;
+      });
+      return {
+        ...state,
+        posts: updatedPosts,
+        loading: false,
+        error: null
+      };
+    case actionTypes.ON_DELETE_POST_FAIL:
+      return {
+        ...state,
+        posts: updatedArr(state.posts),
+        loading: false,
+        error: action.error
+      };
+    case actionTypes.ON_COMMENT_START:
+      return {
+        ...state,
+        posts: updatedArr(state.posts),
+        commentLoading: true,
+        commentError: null
+      };
+    case actionTypes.ON_COMMENT_SUCCESS:
+      return {
+        ...state,
+        posts: state.posts.map(post => {
+          if(+post.post_id === +action.postId) {
+            post.comments = post.comments.concat(action.comment);
+          }
+          return post;
+        }),
+        commentLoading: false,
+        commentError: null
+      };
+    case actionTypes.ON_COMMENT_FAIL:
+      return {
+        ...state,
+        posts: updatedArr(state.posts),
+        commentLoading: false,
+        commentError: null
+      }
+    case actionTypes.ON_COMMENT_DELETE_START:
+      return {
+        ...state,
+        posts: updatedArr(state.posts),
+        commentLoading: true,
+        commentError: null
+      }
+    case actionTypes.ON_COMMENT_DELETE_SUCCESS:
+      const thisPost = state.posts.find(post => {
+        return post.post_id === action.postId
+      });
+      thisPost.comments = thisPost.comments.filter(comment => {
+        return comment.comment_id !== action.commentId;
+      })
+      return {
+        ...state,
+        posts: state.posts.map(post => {
+          if(post.post_id === action.postId) {
+            return thisPost;
+          }
+          return post;
+        }),
+        commentLoading: false,
+        commentError: null
+      }
+    case actionTypes.ON_COMMENT_DELETE_FAIL:
+      return {
+        ...state,
+        posts: updatedArr(state.posts),
+        commentLoading: false,
+        commentError: action.error
+      }
+    default:
+      return state;
+  };
+};
+
+export default reducer;

@@ -32,7 +32,7 @@ export const signin = (email, password) => {
       localStorage.setItem('userId', res.data.user.user_id);
       dispatch({ type: actionTypes.ON_AUTH_SUCCESS, token: res.data.token, userId: res.data.user.user_id });
     }).catch(err => {
-      console.log(err.response.data.error);
+      console.log(err);
       dispatch({ type: actionTypes.ON_AUTH_FAIL, error: err.response.data.error });
     });
   }
