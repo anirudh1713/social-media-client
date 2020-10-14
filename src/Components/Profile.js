@@ -1,10 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { connect } from 'react-redux';
 import * as actions from '../store/actions/index';
 import moment from 'moment';
 
 import {
-  Grid, Avatar, Typography, makeStyles, LinearProgress, Button
+  Grid, Avatar, Typography, makeStyles, LinearProgress, Button, IconButton, Badge
 } from '@material-ui/core';
 import GroupAddIcon from '@material-ui/icons/GroupAdd';
 import PersonAddDisabledIcon from '@material-ui/icons/PersonAddDisabled';
@@ -36,11 +36,16 @@ const useStyles = makeStyles(theme => ({
   },
   post: {
     margin: '20px 0'
+  },
+  input: {
+    display: 'none'
   }
 }));
 
 const Profile = (props) => {
   const classes = useStyles();
+
+  const [profielPic, setProfilePic] = useState(null);
 
   const profileUserId = props.match.params.id;
   const { profileLoad, token, history, profileLoadError } = props;
@@ -73,7 +78,12 @@ const Profile = (props) => {
 
   const onRemoveFriendHandler = () => {
     props.onRemoveFriend(token, profileUserId);
-  }
+  };
+
+  const fileChangeHandler = (e) => {
+    e.preventDefault();
+    setProfilePic(e.target.files[0]);
+  };
 
   
   let dob = props.dob;
@@ -235,7 +245,22 @@ const Profile = (props) => {
             <Grid item xs={2} />
             <Grid item container xs={8} spacing={3} alignItems={"center"} justify={"center"}>
               <Grid item xs={12} sm={6}>
-                <Avatar src={props.profilePhoto ? props.profilePhoto : null} className={classes.profileImage}>{props.username}</Avatar>
+                <input accept="image/*"
+                       className={classes.input}
+                       id="contained-button-file"
+                      //  disabled={props.profilePicLoading ? true : false}
+                       onChange={fileChangeHandler}
+                       type="file"
+                />
+                <label htmlFor="contained-button-file">
+                  <IconButton>
+                    <Avatar src={props.profilePhoto ? props.profilePhoto : null} 
+                            className={classes.profileImage}
+                    >
+                      {props.username}
+                    </Avatar>
+                  </IconButton>
+                </label>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Typography variant={"h4"} component={"h4"}>{props.username}</Typography>

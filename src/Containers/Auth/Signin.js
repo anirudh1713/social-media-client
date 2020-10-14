@@ -4,6 +4,8 @@ import { Link as RLink, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import * as actions from '../../store/actions/index';
+import * as validators from '../../Validators/Validators';
+import { ON_AUTH_ERROR_CLOSE } from '../../store/actions/actionTypes';
 
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -15,13 +17,22 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import MuiAlert from '@material-ui/lab/Alert';
+import { Snackbar, LinearProgress } from '@material-ui/core';
+
+//material ui alert
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
+
 
 const useStyles = makeStyles((theme) => ({
   paper: {
-    marginTop: theme.spacing(8),
+    //marginTop: theme.spacing(8),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    justifyContent: 'center'
   },
   avatar: {
     margin: theme.spacing(1),
@@ -34,23 +45,40 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
+  root: {
+    width: '100%',
+    '& > * + *': {
+      marginTop: theme.spacing(2),
+    }
+  }
 }));
 
 const Signin = (props) => {
   const classes = useStyles();
 
-  const [ email, setEmail ] = useState('');
+  const [ email, setEmail ] = useState({ value: '', valid: true, changed: false });
   const [ password, setPassword ] = useState('');
 
   //on submit (SIGN IN)
   const onSigninHandler = (e) => {
     e.preventDefault();
-    props.onSignin(email, password);
+    if(validators.isEmail(email.value)) {
+        props.onSignin(email.value, password);
+    } else {
+      if(!validators.isEmail(email.value)) {
+        setEmail({ ...email, valid: false, changed: true }); 
+      }
+    }
   };
 
   //email change handler
   const onEmailChangeHandler = (e) => {
-    setEmail(e.target.value);
+    setEmail({
+      ...email, 
+      value:e.target.value, 
+      changed: true,
+      valid: validators.isEmail(email.value)
+    });
   };
 
   //password change handler
@@ -58,9 +86,34 @@ const Signin = (props) => {
     setPassword(e.target.value);
   };
 
+  /************************* Error Handling *************************************/
+  const onErrorCloseHandler = () => {
+    props.onErrorClose();
+  }
+
+  let errorContent = null;
+  if (props.error) {
+    errorContent = (
+      <div className={classes.root}>
+        <Snackbar open={props.error ? true : false} 
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                  autoHideDuration={4000} 
+                  onClose={onErrorCloseHandler}
+        >
+          <Alert onClose={onErrorCloseHandler} severity={"error"}>
+            {props.error}
+          </Alert>
+        </Snackbar>
+      </div>
+    );
+  }
+
+
   return (
     <>
       {props.token ? <Redirect to={'/'} /> : null}
+      {props.loading && <LinearProgress color="secondary" />}
+      {errorContent}
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
@@ -72,17 +125,16 @@ const Signin = (props) => {
           </Typography>
           <form className={classes.form} onSubmit={onSigninHandler}>
             <TextField
-              value={email}
+              value={email.value}
               onChange={onEmailChangeHandler}
               variant="outlined"
               margin="normal"
               required
               fullWidth
-              id="email"
               label="Email Address"
-              name="email"
-              autoComplete="email"
               autoFocus
+              error={!email.valid ? true : false}
+              helperText={!email.valid && "Enter a valid email address."}
             />
             <TextField
               value={password}
@@ -102,6 +154,7 @@ const Signin = (props) => {
               fullWidth
               variant="contained"
               color="primary"
+              disabled={props.loading}
               className={classes.submit}
             >
               Sign In
@@ -122,13 +175,16 @@ const Signin = (props) => {
 
 const mapStateToProps = state => {
   return {
-    token: state.auth.token
+    token: state.auth.token,
+    loading: state.auth.loading,
+    error: state.auth.error
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    onSignin: (email, password) => dispatch(actions.signin(email, password))
+    onSignin: (email, password) => dispatch(actions.signin(email, password)),
+    onErrorClose: () => dispatch({ type: ON_AUTH_ERROR_CLOSE })
   }
 }
 

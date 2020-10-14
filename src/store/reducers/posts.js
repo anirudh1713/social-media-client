@@ -2,13 +2,15 @@ import * as actionTypes from '../actions/actionTypes';
 
 const initialState = {
   posts: null,
-  loading: false,
+  postLoadLoading: false,
+  postLoadError: null,
   addPostLoading: false,
   addPostError: null,
-  error: null,
+  addPostSuccess: false,
   postComplete: false,
   likeError: null,
   commentLoading: false,
+  commentSuccess: false,
   commentError: null
 };
 
@@ -38,26 +40,25 @@ const reducer = (state = initialState, action) => {
     case actionTypes.ON_POST_LOAD_START:
       return {
         ...state,
-        loading: true,
-        error: null
+        postLoadLoading: true,
+        postLoadError: null
       };
     case actionTypes.ON_POST_LOAD_SUCCESS:
       return {
         ...state,
         posts: action.posts,
-        loading: false,
-        error: null
+        postLoadLoading: false,
+        postLoadError: null
       };
     case actionTypes.ON_POST_LOAD_FAIL:
       return {
         ...state,
-        loading: false,
-        error: action.error
+        postLoadLoading: false,
+        postLoadError: action.error
       };
     case actionTypes.ON_ADD_POST_START:
       return {
         ...state,
-        posts: updatedArr(state.posts),
         addPostLoading: true,
         addPostError: null
       };
@@ -66,8 +67,15 @@ const reducer = (state = initialState, action) => {
         ...state,
         posts: updatedArr(state.posts).concat(action.post),
         addPostLoading: false,
+        addPostSuccess: true,
         addPostError: null
       };
+    case actionTypes.ON_ADD_POST_SUCCESS_CLEAR:
+      return {
+        ...state,
+        posts: updatedArr(state.posts),
+        addPostSuccess: false
+      }
     case actionTypes.ON_ADD_POST_FAIL:
       return {
         ...state,
@@ -75,6 +83,12 @@ const reducer = (state = initialState, action) => {
         addPostError: action.error,
         addPostLoading: false
       };
+    case actionTypes.ON_ADD_POST_ERROR_CLEAR:
+      return {
+        ...state,
+        addPostError: null,
+        addPostLoading: false
+      }
     case actionTypes.ON_LIKE_SUCCESS:
       return {
         ...state,
@@ -119,7 +133,6 @@ const reducer = (state = initialState, action) => {
         error: null
       };
     case actionTypes.ON_DELETE_POST_SUCCESS:
-      debugger
       const updatedPosts = state.posts.filter(post => {
         return post.post_id !== action.postId;
       });
@@ -153,13 +166,26 @@ const reducer = (state = initialState, action) => {
           return post;
         }),
         commentLoading: false,
-        commentError: null
+        commentError: null,
+        commentSuccess: true
       };
+    case actionTypes.ON_COMMENT_SUCCESS_CLEAR:
+      return {
+        ...state,
+        posts: updatedArr(state.posts),
+        commentSuccess: false
+      }
     case actionTypes.ON_COMMENT_FAIL:
       return {
         ...state,
         posts: updatedArr(state.posts),
         commentLoading: false,
+        commentError: action.error
+      }
+    case actionTypes.ON_COMMENT_ERROR_CLEAR:
+      return {
+        ...state,
+        posts: updatedArr(state.posts),
         commentError: null
       }
     case actionTypes.ON_COMMENT_DELETE_START:

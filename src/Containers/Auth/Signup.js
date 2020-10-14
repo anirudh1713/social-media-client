@@ -5,11 +5,23 @@ import { Link as RLink, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import * as actions from '../../store/actions/index';
+import * as validators from '../../Validators/Validators';
+import { ON_AUTH_ERROR_CLOSE } from '../../store/actions/actionTypes';
 
-import { TextField, Typography, Link, makeStyles, Container, CssBaseline, FormLabel, Radio, RadioGroup, Avatar, Grid, FormControl, FormControlLabel, Button } from "@material-ui/core";
+import { TextField, Typography, Link, makeStyles, Container, CssBaseline, 
+         FormLabel, Radio, RadioGroup, Avatar, Grid, FormControl, FormControlLabel, 
+         Button, LinearProgress } 
+from "@material-ui/core";
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import DateFnsUtils from "@date-io/date-fns";
+import MuiAlert from '@material-ui/lab/Alert';
+import { Snackbar } from '@material-ui/core';
+
+//material ui alert
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -31,53 +43,120 @@ const useStyles = makeStyles((theme) => ({
   },
   genderStyle: {
     display: 'flex'
+  },
+  root: {
+    width: '100%',
+    '& > * + *': {
+      marginTop: theme.spacing(2),
+    }
   }
 }));
 
 const Signup = (props) => {
   const classes = useStyles();
 
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [dob, setDob] = useState(new Date());
-  const [gender, setGender] = useState('');
+  const [username, setUsername] = useState({ value: '', valid: true, changed: false });
+  const [email, setEmail] = useState({ value: '', valid: true, changed: false });
+  const [password, setPassword] = useState({ value: '', valid: true, changed: false });
+  const [dob, setDob] = useState({ value: new Date(), valid: true, changed: false });
+  const [gender, setGender] = useState({ value: '', valid: true, changed: false });
 
   //date change
   const dobChangeHandler = (date) => {
-    setDob(date);
+    setDob({
+      value: date,
+      changed: true,
+      valid: validators.isDate(date)
+    });
   };
 
   //gender change
   const genderChangeHandler = (e) => {
-    setGender(e.target.value);
+    setGender({
+      value: e.target.value,
+      changed: true,
+      valid: validators.isGender(e.target.value)
+    });
   }
 
   //username change
   const usernameChangeHandler = (e) => {
-    setUsername(e.target.value);
+    setUsername({
+      value: e.target.value,
+      changed: true,
+      valid: validators.isUsername(e.target.value)
+    });
   }
 
   //email change
   const emailChangeHandler = (e) => {
-    setEmail(e.target.value);
+    setEmail({
+      value: e.target.value,
+      changed: true,
+      valid: validators.isEmail(e.target.value)
+    });
   }
 
   //set password
   const passwordChangeHandler = (e) => {
-    setPassword(e.target.value);
+    setPassword({
+      value: e.target.value,
+      changed: true,
+      valid: validators.isPassword(e.target.value)
+    });
   }
 
-  //submit
+  /****************** ON SIGNUP *************************/
   const onSubmitHandler = (e) => {
     e.preventDefault();
-    props.onSignup(username, email, password, dob, gender);
+    if(validators.isEmail(email.value) 
+        && validators.isUsername(username.value) 
+        && validators.isDate(dob.value) 
+        && validators.isPassword(password.value) 
+        && validators.isGender(gender.value)) {
+          props.onSignup(username.value, email.value, password.value, dob.value, gender.value);
+    } else {
+      if (!validators.isUsername(username.value)) {
+        setUsername({ ...username, valid: false, changed: true });
+      } else if(!validators.isEmail(email.value)) {
+        setEmail({ ...email, valid: false, changed: true }); 
+      } else if (!validators.isPassword(password.value)) {
+        setPassword({ ...password, valid: false, changed: true });
+      } else if (!validators.isDate(dob.value)) {
+        setDob({ ...dob, valid: false, changed: true });
+      } else if (!validators.isGender(gender.value)) {
+        setGender({ ...gender, valid: false, changed: true });
+      }
+    }
   }
 
+  /************************* Error Handling *************************************/
+  const onErrorCloseHandler = () => {
+    props.onErrorClose();
+  }
+
+  let errorContent = null;
+  if (props.error) {
+    errorContent = (
+      <div className={classes.root}>
+        <Snackbar open={props.error ? true : false} 
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                  autoHideDuration={4000} 
+                  onClose={onErrorCloseHandler}
+        >
+          <Alert onClose={onErrorCloseHandler} severity={"error"}>
+            {props.error}
+          </Alert>
+        </Snackbar>
+      </div>
+    );
+  }
 
   return (
     <>
       {props.token ? <Redirect to={'/'} /> : null}
+      {props.loading && <LinearProgress color="secondary" />}
+      {errorContent}
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
@@ -87,20 +166,20 @@ const Signup = (props) => {
           <Typography component="h1" variant="h5">
             Sign up
           </Typography>
-          <form className={classes.form} onSubmit={onSubmitHandler}>
+          <form className={classes.form} autoComplete={"off"} noValidate onSubmit={onSubmitHandler}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <TextField
-                  autoComplete="uname"
-                  name="username"
                   variant="outlined"
                   required
                   fullWidth
-                  id="userName"
                   label="Username"
+                  id="standard-error-helper-text"
                   autoFocus
-                  value={username}
+                  value={username.value}
                   onChange={usernameChangeHandler}
+                  error={!username.valid ? true : false}
+                  helperText={!username.valid && "Numbers and special characters are not allowed."}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -111,9 +190,10 @@ const Signup = (props) => {
                   id="email"
                   label="Email Address"
                   name="email"
-                  autoComplete="email"
-                  value={email}
+                  value={email.value}
                   onChange={emailChangeHandler}
+                  error={!email.valid ? true : false}
+                  helperText={!email.valid && "Enter a valid email address."}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -125,9 +205,10 @@ const Signup = (props) => {
                   label="Password"
                   type="password"
                   id="password"
-                  autoComplete="current-password"
-                  value={password}
+                  value={password.value}
                   onChange={passwordChangeHandler}
+                  error={!password.valid ? true : false}
+                  helperText={!password.valid && "Password must be at least Minimum 8 characters, one uppercase letter, one lowercase letter, one number and one special character"}
                 />
               </Grid>
               <MuiPickersUtilsProvider utils={DateFnsUtils}>
@@ -136,18 +217,24 @@ const Signup = (props) => {
                     margin="normal"
                     id="date-picker-dialog"
                     label="Date of birth"
-                    value={dob}
+                    value={dob.value}
                     onChange={dobChangeHandler}
                     KeyboardButtonProps={{
                       'aria-label': 'change date',
                     }}
+                    error={!dob.valid}
+                    helperText={!dob.valid && "You must be 16 years or older."}
                   />
                 </Grid>
               </MuiPickersUtilsProvider>
               <Grid item container>
                 <FormControl component="fieldset">
                   <FormLabel component="legend">Gender</FormLabel>
-                  <RadioGroup aria-label="gender" name="gender1" value={gender} onChange={genderChangeHandler}>
+                  <RadioGroup aria-label="gender" 
+                              name="gender1" 
+                              value={gender.value} 
+                              onChange={genderChangeHandler}
+                  >
                     <div className={classes.genderStyle}>
                       <FormControlLabel value="F" control={<Radio />} label="Female" />
                       <FormControlLabel value="M" control={<Radio />} label="Male" />
@@ -160,6 +247,7 @@ const Signup = (props) => {
             <Button
               type="submit"
               fullWidth
+              disabled={props.loading ? true : false}
               variant="contained"
               color="primary"
               className={classes.submit}
@@ -182,13 +270,16 @@ const Signup = (props) => {
 
 const mapStateToProps = state => {
   return {
-    token: state.auth.token
+    token: state.auth.token,
+    loading: state.auth.loading,
+    error: state.auth.error
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    onSignup: (username, email, password, dob, gender) => dispatch(actions.signup(username, email, password, dob, gender))
+    onSignup: (username, email, password, dob, gender) => dispatch(actions.signup(username, email, password, dob, gender)),
+    onErrorClose: () => dispatch({ type: ON_AUTH_ERROR_CLOSE })
   };
 };
 

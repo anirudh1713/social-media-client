@@ -39,6 +39,11 @@ const store = (state = initialState, action) => {
         ...state,
         error: action.error
       }
+    case actionTypes.ON_AUTH_ERROR_CLOSE:
+      return {
+        ...state,
+        error: null
+      }
     default:
       return state;
   }
