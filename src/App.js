@@ -47,7 +47,17 @@ const App = (props) => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-        { props.token ? <NavBar logOutHandler={onLogoutHandler} userId={props.userId} /> : null }
+        { props.token ? 
+          <NavBar logOutHandler={onLogoutHandler} 
+                  pendingRequests={props.pendingRequests ? props.pendingRequests : []} 
+                  userId={props.userId} 
+                  token={props.token}
+                  username={props.username}
+                  onAcceptReq={props.onAcceptRequest}
+                  onRejectReq={props.onRejectRequest}
+                  pendingRequests={props.pendingRequests}
+          /> : null 
+        }
         <Switch>
           <Route path={'/signup'} component={Signup} />
           <Route path={'/signin'} component={Signin} />
@@ -67,7 +77,8 @@ const App = (props) => {
 const mapStateToProps = state => {
   return {
     token: state.auth.token,
-    userId: state.auth.userId
+    userId: state.auth.userId,
+    pendingRequests: state.friends.pendingRequests
   };
 };
 
@@ -78,7 +89,9 @@ const mapDispatchToProps = dispatch => {
     onPostsLoad: (token) => dispatch(actions.postsLoad(token)),
     onFriendsLoad: (token) => dispatch(actions.friendsLoad(token)),
     onSentReqLoad: (token) => dispatch(actions.onSentRequestLoad(token)),
-    onPendingReqLoad: (token) => dispatch(actions.onPendingRequestLoad(token))
+    onPendingReqLoad: (token) => dispatch(actions.onPendingRequestLoad(token)),
+    onAcceptRequest: (token, requesterId) => dispatch(actions.onAcceptRequest(token, requesterId)),
+    onRejectRequest: (token, userId) => dispatch(actions.onRejectRequest(token, userId))
   };
 };
 

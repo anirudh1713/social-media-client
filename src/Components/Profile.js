@@ -4,7 +4,7 @@ import * as actions from '../store/actions/index';
 import moment from 'moment';
 
 import {
-  Grid, Avatar, Typography, makeStyles, LinearProgress, Button, IconButton, Badge
+  Grid, Avatar, Typography, makeStyles, LinearProgress, Button, IconButton, Tabs, Tab
 } from '@material-ui/core';
 import GroupAddIcon from '@material-ui/icons/GroupAdd';
 import PersonAddDisabledIcon from '@material-ui/icons/PersonAddDisabled';
@@ -12,6 +12,8 @@ import PersonAddDisabledIcon from '@material-ui/icons/PersonAddDisabled';
 import CreatePost from '../Containers/CreatePost/CreatePost';
 import Post from "./Post";
 import { Redirect } from "react-router-dom";
+import About from "./About";
+import UserDataUpdate from "./UserDataUpdate";
 
 const useStyles = makeStyles(theme => ({
   profileImage: {
@@ -45,7 +47,7 @@ const useStyles = makeStyles(theme => ({
 const Profile = (props) => {
   const classes = useStyles();
 
-  const [profielPic, setProfilePic] = useState(null);
+  const [value, setValue] = useState(0);
 
   const profileUserId = props.match.params.id;
   const { profileLoad, token, history, profileLoadError } = props;
@@ -82,13 +84,29 @@ const Profile = (props) => {
 
   const fileChangeHandler = (e) => {
     e.preventDefault();
-    setProfilePic(e.target.files[0]);
+    let formData = new FormData();
+    formData.append('profileImage', e.target.files[0]);
+    props.onProfilePhotoChange(formData, token);
   };
 
-  
+  const handleTabChange = (e, value) => {
+    setValue(value);
+  }
+
+  //about data (DOB AND GENDER)
   let dob = props.dob;
   dob = moment(dob).format("MMM Do YYYY");
 
+  let gender = '';
+  if(props.gender === 'M') {
+    gender = 'Male';
+  }else if (props.gender === 'F') {
+    gender = 'Female';
+  }else {
+    gender = 'Other';
+  }
+  
+  //post contents
   let postContent = null;
   let userPosts = null;
   if (props.posts) {
@@ -106,6 +124,7 @@ const Profile = (props) => {
                 title={post.title}
                 postDate={postDate}
                 imageURL={post.picture}
+                userProfilePhoto={props.profilePhoto}
                 description={post.description}
                 likes={post.likes.length}
                 dislikes={post.dislikes.length}
@@ -130,13 +149,41 @@ const Profile = (props) => {
     );
   }
 
+  //create post and Avatar contents & update data
   let createPostContent = null;
+  let avatarContent = (
+    <Avatar src={props.profilePhoto ? props.profilePhoto : null} 
+                    className={classes.profileImage}
+    >
+      {props.username}
+    </Avatar>
+  );
 
+  //if users is the signedin user
   if (props.userId && profileUserId && +props.userId === +profileUserId) {
     createPostContent = (
       <Grid item xs={12}>
         <CreatePost />
       </Grid>
+    );
+    avatarContent = (
+      <>
+        <input accept="image/*"
+                      onChange={fileChangeHandler} 
+                      className={classes.input} 
+                      id="icon-button-file" 
+                      type="file" 
+              />
+        <label htmlFor="icon-button-file">
+          <IconButton color="primary" aria-label="upload picture" component="span">
+            <Avatar src={props.profilePhoto ? props.profilePhoto : null} 
+                    className={classes.profileImage}
+            >
+              {props.username}
+            </Avatar>
+          </IconButton>
+        </label>
+      </>
     );
   }
 
@@ -180,7 +227,7 @@ const Profile = (props) => {
     if (pendingOrNot) {
       addFriendButton = (
         <Grid container item xs={12} direction={"row"} justify={"space-around"} alignItems={"center"}>
-          <Grid item xs={6}>
+          <Grid item xs={12}>
             <Button fullWidth 
                   color={"primary"} 
                   variant={"contained"}
@@ -190,7 +237,7 @@ const Profile = (props) => {
               Accept
             </Button>
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={12} style={{ marginTop: '10px' }}>
             <Button fullWidth 
                   color={"secondary"}
                   onClick={onRejectRequestHandler} 
@@ -224,7 +271,7 @@ const Profile = (props) => {
     }
   }
 
-  if (!props.postLoading && !props.userLoading) {
+  if (!props.postLoading && !props.userLoading && !props.friendsLoading) {
     content = (
       <Grid container>
         <Grid item xs={3} />
@@ -236,43 +283,57 @@ const Profile = (props) => {
               justify={"center"}
         >
           <Grid container 
-                item xs={12} 
-                direction={"row"} 
+                item 
+                xs={12} 
+                direction={"column"} 
                 alignItems={"center"} 
                 justify={"center"}
                 className={classes.rootWithBottom}
           >
-            <Grid item xs={2} />
-            <Grid item container xs={8} spacing={3} alignItems={"center"} justify={"center"}>
-              <Grid item xs={12} sm={6}>
-                <input accept="image/*"
-                       className={classes.input}
-                       id="contained-button-file"
-                      //  disabled={props.profilePicLoading ? true : false}
-                       onChange={fileChangeHandler}
-                       type="file"
-                />
-                <label htmlFor="contained-button-file">
-                  <IconButton>
-                    <Avatar src={props.profilePhoto ? props.profilePhoto : null} 
-                            className={classes.profileImage}
-                    >
-                      {props.username}
-                    </Avatar>
-                  </IconButton>
-                </label>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant={"h4"} component={"h4"}>{props.username}</Typography>
-              </Grid>
-              {props.userId && profileUserId && +props.userId === +profileUserId ? null :
-                <>{addFriendButton}</>
-              }
+            <Grid item xs={12}>
+              {avatarContent}
             </Grid>
-            <Grid item xs={2} />
+            <Grid item xs={12}>
+              <Typography variant={"h4"} component={"h4"}>{props.username}</Typography>
+            </Grid>
+            {props.userId && profileUserId && +props.userId === +profileUserId ? null :
+              <>{addFriendButton}</>
+            }
           </Grid>
-          {createPostContent}
-          {postContent}
+          <Tabs value={value}
+                onChange={handleTabChange}
+                indicatorColor="primary"
+                textColor="primary"
+                variant="fullWidth"
+          >
+            <Tab label="Posts" />
+            <Tab label="About" />
+          </Tabs>
+          {value === 0 &&
+            <>
+              {createPostContent}
+              {postContent}
+            </>
+          }
+          {value === 1 &&
+            <>
+              <About data={[
+                { name: 'Username', value: `${props.username}` },
+                { name: 'Birthday', value: `${dob}` },
+                { name: 'Gender', value: `${gender}` },
+                { name: 'Email', value: `${props.email}` }
+              ]} />
+              <Grid item xs={6} style={{ marginTop: '10px' }}>
+                <UserDataUpdate username={props.username}
+                                dob={props.dob}
+                                gender={props.gender}
+                                email={props.email}
+                                token={token}
+                                onUpdateData={props.onUpdateData}
+                />
+              </Grid>
+            </>
+          }
         </Grid>
         <Grid item xs={3} />
       </Grid>
@@ -302,7 +363,8 @@ const mapStateToProps = state => {
     sentRequests: state.friends.sentRequests,
     friends: state.friends.friends,
     pendingRequests: state.friends.pendingRequests,
-    friendsLoading: state.friends.loading
+    friendsLoading: state.friends.loading,
+    email: state.profile.email
   };
 };
 
@@ -312,7 +374,9 @@ const mapDispatchToProps = dispatch => {
     onAddFriend: (token, userId) => dispatch(actions.onAddFriend(token, userId)),
     onAcceptRequest: (token, requesterId) => dispatch(actions.onAcceptRequest(token, requesterId)),
     onRejectRequest: (token, userId) => dispatch(actions.onRejectRequest(token, userId)),
-    onRemoveFriend: (token, userId) => dispatch(actions.onRemoveFriend(token, userId))
+    onRemoveFriend: (token, userId) => dispatch(actions.onRemoveFriend(token, userId)),
+    onProfilePhotoChange: (profilePhoto, token) => dispatch(actions.addProfileImage(profilePhoto, token)),
+    onUpdateData: (data, token) => dispatch(actions.updateUserData(data, token))
   };
 };
 

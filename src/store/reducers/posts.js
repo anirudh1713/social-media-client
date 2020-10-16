@@ -63,6 +63,9 @@ const reducer = (state = initialState, action) => {
         addPostError: null
       };
     case actionTypes.ON_ADD_POST_SUCCESS:
+      if (!state.posts) {
+        state.posts = [];
+      }
       return {
         ...state,
         posts: updatedArr(state.posts).concat(action.post),

@@ -6,8 +6,6 @@ import { Grid, makeStyles, LinearProgress, Typography } from "@material-ui/core"
 
 import CreatePost from "../CreatePost/CreatePost";
 import Post from '../../Components/Post';
-import People from '../../Components/People';
-import { Person } from "@material-ui/icons";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,6 +46,7 @@ const Feed = (props) => {
         <Grid item xs={12} className={classes.post} key={post.post_id}>
           <Post username={post.user.username}
                 postUserId={post.user.user_id}
+                userProfilePhoto={post.user.profile_photo}
                 title={post.title}
                 postDate={postDate}
                 imageURL={post.picture}
@@ -65,13 +64,7 @@ const Feed = (props) => {
     //RENDER MAIN FEED CONTENT
     feedContent = (
       <Grid container className={classes.root}>
-        <Grid item container xs={3} className={classes.createPost}>
-          <Grid item xs={1} />
-          <Grid item xs={10}>
-            <People />
-          </Grid>
-          <Grid item xs={1} />
-        </Grid>
+        <Grid item container xs={3} />
         <Grid item container xs={6} className={classes.createPost}>
           <Grid item xs={12}>
             <CreatePost />
@@ -84,11 +77,7 @@ const Feed = (props) => {
   }else {
     feedContent = (
       <Grid container className={classes.root}>
-        <Grid item container xs={3} className={classes.createPost}>
-          <Grid item xs={12}>
-            <People />
-          </Grid>
-        </Grid>
+        <Grid item container xs={3} />
         <Grid item container xs={6} className={classes.createPost}>
           <Grid item xs={12}>
             <CreatePost />

@@ -1,5 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { withRouter } from 'react-router-dom';
+import axios from 'axios';
+
+import PendingRequest from './PendingRequest';
 
 import { fade, makeStyles } from '@material-ui/core/styles';
 import Button from "@material-ui/core/Button";
@@ -16,7 +19,17 @@ import AccountCircle from '@material-ui/icons/AccountCircle';
 import MailIcon from '@material-ui/icons/Mail';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
+import UserSearch from './UserSearch';
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import PersonAddIcon from '@material-ui/icons/PersonAdd';
+import { List } from '@material-ui/core';
 
+
+//Custom MUI css
 const useStyles = makeStyles((theme) => ({
   grow: {
     flexGrow: 1,
@@ -83,12 +96,34 @@ const useStyles = makeStyles((theme) => ({
 
 const NavBar = (props) => {
   const classes = useStyles();
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
+
+  const [search, setSearch] = useState('');
+  const [filteredUsers, setFilteredUsers] = useState([]);
+
+  const { token } = props;
+
+  useEffect(() => {
+    if (search.trim() !== '') {
+      axios.get(`http://localhost:30001/search?username=${search.trim().toLowerCase()}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }).then(res => {
+        setFilteredUsers(res.data.users);
+      }).catch(err => {
+        console.log(err);
+      });
+    }else {
+      setFilteredUsers([]);
+    }
+  }, [search, token]);
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
+  //handler functions
   const handleProfileMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -104,6 +139,28 @@ const NavBar = (props) => {
 
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
+  };
+
+  //dialogs handler
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  //pending requests dialogs
+  const [reqOpen, setReqOpen] = useState(false);
+
+  const handleClickOpenReq = () => {
+    setReqOpen(true);
+  };
+
+  const handleCloseReq = () => {
+    setReqOpen(false);
   };
 
   const menuId = 'primary-search-account-menu';
@@ -122,6 +179,23 @@ const NavBar = (props) => {
     </Menu>
   );
 
+  //pending req data
+  let pendingReqList = null;
+  if (props.pendingRequests && props.pendingRequests.length > 0) {
+    pendingReqList = props.pendingRequests.map(req => {
+      return <PendingRequest key={req.user.user_id}
+                             username={req.user.username}
+                             userId={req.user.user_id}
+                             userProfileImage={req.user.profile_photo}
+                             onAcceptReq={props.onAcceptReq}
+                             onRejectReq={props.onRejectReq}
+                             onClose={handleCloseReq}
+                             token={props.token}
+             />;
+    });
+  }
+
+  //mobile menu
   const mobileMenuId = 'primary-search-account-menu-mobile';
   const renderMobileMenu = (
     <Menu
@@ -133,22 +207,30 @@ const NavBar = (props) => {
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      <MenuItem>
-        <IconButton aria-label="show 4 new mails" color="inherit">
-          <Badge badgeContent={4} color="secondary">
-            <MailIcon />
+      {/* <MenuItem onClick={handleClickOpenReq}>
+        <IconButton color="inherit">
+          <Badge badgeContent={props.pendingRequests ? props.pendingRequests.length : null} color="secondary">
+            <PersonAddIcon />
           </Badge>
+          <Dialog open={reqOpen} fullWidth onClose={handleCloseReq} aria-labelledby="form-dialog-title">
+            <DialogTitle id="form-dialog-title">Pending Requests</DialogTitle>
+            <DialogContent>
+              {props.pendingRequests && props.pendingRequests.length > 0 ?
+                <List dense>
+                  {pendingReqList}
+                </List>
+                : `No Pending Requests`
+              }
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseReq} color="primary">
+                Cancel
+              </Button>
+            </DialogActions>
+          </Dialog>
         </IconButton>
-        <p>Messages</p>
-      </MenuItem>
-      <MenuItem>
-        <IconButton aria-label="show 11 new notifications" color="inherit">
-          <Badge badgeContent={11} color="secondary">
-            <NotificationsIcon />
-          </Badge>
-        </IconButton>
-        <p>Notifications</p>
-      </MenuItem>
+        <p>Pending Requests</p>
+      </MenuItem> */}
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
           aria-label="account of current user"
@@ -162,6 +244,19 @@ const NavBar = (props) => {
       </MenuItem>
     </Menu>
   );
+
+  //search results
+  let searchResults = null;
+  if (filteredUsers.length > 0) {
+    searchResults = filteredUsers.map(user => {
+      return (<UserSearch key={user.user_id} 
+                         userId={user.user_id} 
+                         userProfileImage={user.profile_photo} 
+                         username={user.username}
+                         onClose={handleClose}
+              />);
+    });
+  }
 
   return (
     <div className={classes.grow}>
@@ -178,25 +273,63 @@ const NavBar = (props) => {
             </div>
             <InputBase
               placeholder="Search…"
+              onClick={handleClickOpen}
               classes={{
                 root: classes.inputRoot,
                 input: classes.inputInput,
               }}
               inputProps={{ 'aria-label': 'search' }}
             />
+            <Dialog open={open} fullWidth onClose={handleClose} aria-labelledby="form-dialog-title">
+              <DialogTitle id="form-dialog-title">Search</DialogTitle>
+              <DialogContent>
+                <TextField
+                  autoFocus
+                  margin="dense"
+                  id="name"
+                  label="search"
+                  type="text"
+                  autoComplete="off"
+                  fullWidth
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                {filteredUsers.length > 0 ?
+                  <List dense>
+                    {searchResults}
+                  </List> : null
+                }
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleClose} color="primary">
+                  Cancel
+                </Button>
+              </DialogActions>
+            </Dialog>
           </div>
           <div className={classes.grow} />
           <div className={classes.sectionDesktop}>
-            <IconButton aria-label="show 4 new mails" color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <MailIcon />
+            <IconButton onClick={handleClickOpenReq} aria-label="show 17 new notifications" color="inherit">
+              <Badge badgeContent={props.pendingRequests ? props.pendingRequests.length : null} color="secondary">
+                <PersonAddIcon />
               </Badge>
             </IconButton>
-            <IconButton aria-label="show 17 new notifications" color="inherit">
-              <Badge badgeContent={17} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+            <Dialog open={reqOpen} fullWidth onClose={handleCloseReq} aria-labelledby="form-dialog-title">
+              <DialogTitle id="form-dialog-title">Pending Requests</DialogTitle>
+              <DialogContent>
+                {props.pendingRequests && props.pendingRequests.length > 0 ?
+                  <List dense>
+                    {pendingReqList}
+                  </List>
+                  : `No Pending Requests`
+                }
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleCloseReq} color="primary">
+                  Cancel
+                </Button>
+              </DialogActions>
+            </Dialog>
             <IconButton
               edge="end"
               aria-label="account of current user"

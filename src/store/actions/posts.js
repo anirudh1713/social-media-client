@@ -34,8 +34,12 @@ export const addPost = (token, formData) => {
       console.log(res);
       dispatch({ type: actionTypes.ON_ADD_POST_SUCCESS, post: res.data });
     }).catch(err => {
-      console.log(err);
-      dispatch({ type: actionTypes.ON_ADD_POST_FAIL, error: err.response.data.error });
+      console.log(err.response);
+      if (err.response.data.error.message) {
+        dispatch({ type: actionTypes.ON_ADD_POST_FAIL, error: err.response.data.error.message });
+      }else {
+        dispatch({ type: actionTypes.ON_ADD_POST_FAIL, error: err });
+      }
     });
   };
 };

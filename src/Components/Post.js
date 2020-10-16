@@ -7,7 +7,7 @@ import UserComment from './UserComment';
 
 import { Card, CardHeader, Avatar, CardMedia, 
         CardContent, Typography, CardActions, 
-        makeStyles, IconButton, Divider, Button } 
+        makeStyles, IconButton, Button } 
 from '@material-ui/core';
 import ThumbUpIcon from '@material-ui/icons/ThumbUp';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
@@ -125,7 +125,7 @@ const Post = (props) => {
     <Card>
       <div className={classes.postHeader}>
         <Link to={`/user/${props.postUserId}`} className={classes.linkClass}>
-          <CardHeader avatar={<Avatar>{props.username}</Avatar>}
+          <CardHeader avatar={<Avatar src={props.userProfilePhoto}>{props.username}</Avatar>}
                       title={props.username}
                       subheader={props.postDate}
           />
@@ -176,7 +176,8 @@ const Post = (props) => {
 const mapStateToProps = state => {
   return {
     userId: state.auth.userId,
-    posts: state.posts.posts
+    posts: state.posts.posts,
+    profilePhoto: state.profile.profilePhoto
   };
 };
 
