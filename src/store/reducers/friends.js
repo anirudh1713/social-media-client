@@ -1,4 +1,3 @@
-import { friendsLoad } from '../actions';
 import * as actionTypes from '../actions/actionTypes';
 
 const initialState = {
@@ -9,11 +8,23 @@ const initialState = {
   error: null
 };
 
-const updatedArr = (arr) => {
-  return arr.map(item => {
-    return item;
-  });
-};
+// const updatedPendingReq = (arr) => {
+//   return arr.map(item => {
+//     return { ...item, user: { ...item.user } };
+//   });
+// };
+
+// const updatedSentReq = (arr) => {
+//   return arr.map(item => {
+//     return { ...item, user: { ...item.user } };
+//   });
+// };
+
+// const updatedFriends = (arr) => {
+//   return arr.map(item => {
+//     return { ...item };
+//   });
+// };
 
 const reducer = (state = initialState, action) => {
   switch(action.type) {
@@ -155,6 +166,8 @@ const reducer = (state = initialState, action) => {
         loading: false,
         error: action.error
       }
+    case actionTypes.ON_AUTH_SUCCESS:
+      return initialState;
     default:
       return state;
   }

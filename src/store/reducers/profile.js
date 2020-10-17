@@ -10,7 +10,10 @@ const initialState = {
   email: null,
   dataUpdateLoading: false,
   dataUpdateError: null,
-  dataUpdateSuccess: false
+  dataUpdateSuccess: false,
+  passwordChangeLoading: true,
+  passwordChangeError: null,
+  passwordChangeSuccess: false
 };
 
 const reducer = (state = initialState, action) => {
@@ -79,6 +82,34 @@ const reducer = (state = initialState, action) => {
       return {
         ...state,
         dataUpdateError: null
+      }
+    case actionTypes.ON_USER_PASSWORD_UPDATE_START:
+      return {
+        ...state,
+        passwordChangeLoading: true
+      }
+    case actionTypes.ON_USER_PASSWORD_UPDATE_SUCESS:
+      return {
+        ...state,
+        passwordChangeLoading: false,
+        passwordChangeSuccess: true
+      }
+    case actionTypes.ON_USER_PASSWORD_UPDATE_FAIL:
+      return {
+        ...state,
+        passwordChangeLoading: false,
+        passwordChangeSuccess: false,
+        passwordChangeError: action.error
+      }
+    case actionTypes.ON_USER_PASSWORD_UPDATE_ERROR_CLEAR:
+      return {
+        ...state,
+        passwordChangeError: null
+      }
+    case actionTypes.ON_USER_PASSWORD_UPDATE_SUCCESS_CLEAR:
+      return {
+        ...state,
+        passwordChangeSuccess: false
       }
     default:
       return state;

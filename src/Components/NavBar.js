@@ -16,9 +16,6 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import SearchIcon from '@material-ui/icons/Search';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import MailIcon from '@material-ui/icons/Mail';
-import NotificationsIcon from '@material-ui/icons/Notifications';
-import MoreIcon from '@material-ui/icons/MoreVert';
 import UserSearch from './UserSearch';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -121,7 +118,7 @@ const NavBar = (props) => {
   }, [search, token]);
 
   const isMenuOpen = Boolean(anchorEl);
-  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+  //const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   //handler functions
   const handleProfileMenuOpen = (event) => {
@@ -137,9 +134,9 @@ const NavBar = (props) => {
     handleMobileMenuClose();
   };
 
-  const handleMobileMenuOpen = (event) => {
-    setMobileMoreAnchorEl(event.currentTarget);
-  };
+  // const handleMobileMenuOpen = (event) => {
+  //   setMobileMoreAnchorEl(event.currentTarget);
+  // };
 
   //dialogs handler
   const [open, setOpen] = useState(false);
@@ -195,55 +192,51 @@ const NavBar = (props) => {
     });
   }
 
-  //mobile menu
-  const mobileMenuId = 'primary-search-account-menu-mobile';
-  const renderMobileMenu = (
-    <Menu
-      anchorEl={mobileMoreAnchorEl}
-      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      id={mobileMenuId}
-      keepMounted
-      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      open={isMobileMenuOpen}
-      onClose={handleMobileMenuClose}
-    >
-      {/* <MenuItem onClick={handleClickOpenReq}>
-        <IconButton color="inherit">
-          <Badge badgeContent={props.pendingRequests ? props.pendingRequests.length : null} color="secondary">
-            <PersonAddIcon />
-          </Badge>
-          <Dialog open={reqOpen} fullWidth onClose={handleCloseReq} aria-labelledby="form-dialog-title">
-            <DialogTitle id="form-dialog-title">Pending Requests</DialogTitle>
-            <DialogContent>
-              {props.pendingRequests && props.pendingRequests.length > 0 ?
-                <List dense>
-                  {pendingReqList}
-                </List>
-                : `No Pending Requests`
-              }
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseReq} color="primary">
-                Cancel
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </IconButton>
-        <p>Pending Requests</p>
-      </MenuItem> */}
-      <MenuItem onClick={handleProfileMenuOpen}>
-        <IconButton
-          aria-label="account of current user"
-          aria-controls="primary-search-account-menu"
-          aria-haspopup="true"
-          color="inherit"
-        >
-          <AccountCircle />
-        </IconButton>
-        <p>Profile</p>
-      </MenuItem>
-    </Menu>
+  //pending req dialog
+  const dialogContent = (
+    <Dialog open={reqOpen} onClose={handleCloseReq} fullWidth aria-labelledby="form-dialog-title">
+      <DialogTitle id="form-dialog-title">Pending Requests</DialogTitle>
+      <DialogContent>
+        {props.pendingRequests && props.pendingRequests.length > 0 ?
+          <List dense>
+            {pendingReqList}
+          </List>
+          : `No Pending Requests`
+        }
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCloseReq} color="primary">
+          Cancel
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
+
+  //mobile menu
+  // const mobileMenuId = 'primary-search-account-menu-mobile';
+  // const renderMobileMenu = (
+  //   <Menu
+  //     anchorEl={mobileMoreAnchorEl}
+  //     anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+  //     id={mobileMenuId}
+  //     keepMounted
+  //     transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+  //     open={isMobileMenuOpen}
+  //     onClose={handleMobileMenuClose}
+  //   >
+  //     <MenuItem onClick={handleProfileMenuOpen}>
+  //       <IconButton
+  //         aria-label="account of current user"
+  //         aria-controls="primary-search-account-menu"
+  //         aria-haspopup="true"
+  //         color="inherit"
+  //       >
+  //         <AccountCircle />
+  //       </IconButton>
+  //       <p>Profile</p>
+  //     </MenuItem>
+  //   </Menu>
+  // );
 
   //search results
   let searchResults = null;
@@ -308,28 +301,13 @@ const NavBar = (props) => {
             </Dialog>
           </div>
           <div className={classes.grow} />
-          <div className={classes.sectionDesktop}>
+          <div>
             <IconButton onClick={handleClickOpenReq} aria-label="show 17 new notifications" color="inherit">
               <Badge badgeContent={props.pendingRequests ? props.pendingRequests.length : null} color="secondary">
                 <PersonAddIcon />
               </Badge>
             </IconButton>
-            <Dialog open={reqOpen} fullWidth onClose={handleCloseReq} aria-labelledby="form-dialog-title">
-              <DialogTitle id="form-dialog-title">Pending Requests</DialogTitle>
-              <DialogContent>
-                {props.pendingRequests && props.pendingRequests.length > 0 ?
-                  <List dense>
-                    {pendingReqList}
-                  </List>
-                  : `No Pending Requests`
-                }
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseReq} color="primary">
-                  Cancel
-                </Button>
-              </DialogActions>
-            </Dialog>
+            {dialogContent}
             <IconButton
               edge="end"
               aria-label="account of current user"
@@ -341,7 +319,7 @@ const NavBar = (props) => {
               <AccountCircle />
             </IconButton>
           </div>
-          <div className={classes.sectionMobile}>
+          {/* <div className={classes.sectionMobile}>
             <IconButton
               aria-label="show more"
               aria-controls={mobileMenuId}
@@ -351,10 +329,10 @@ const NavBar = (props) => {
             >
               <MoreIcon />
             </IconButton>
-          </div>
+          </div> */}
         </Toolbar>
       </AppBar>
-      {renderMobileMenu}
+      {/* {renderMobileMenu} */}
       {renderMenu}
     </div>
   );

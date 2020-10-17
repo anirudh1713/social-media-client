@@ -99,7 +99,7 @@ const UserDataUpdate = (props) => {
 
   return (
     <>
-      <Button onClick={handleClickOpen} variant="outlined">Edit information</Button>
+      <Button fullWidth onClick={handleClickOpen} variant="outlined">Edit information</Button>
       <Dialog open={open}
               onClose={handleClose}
       >

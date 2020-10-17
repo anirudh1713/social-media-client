@@ -1,6 +1,10 @@
 export { signin, signup, logout } from './auth';
 
-export { profileLoad, addProfileImage, updateUserData } from './profile';
+export { profileLoad, 
+         addProfileImage, 
+         updateUserData,
+         changePassword } 
+from './profile';
 
 export { postsLoad, 
          addPost, 

@@ -65,3 +65,27 @@ export const updateUserData = (data, token) => {
     });
   }
 };
+
+export const changePassword = (oldPass, newPass, token) => {
+  return dispatch => {
+    dispatch({ type: actionTypes.ON_USER_PASSWORD_UPDATE_START });
+    axios.patch('http://localhost:30001/user/password', {
+      password: oldPass,
+      newPassword: newPass
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).then(res => {
+      dispatch({ type: actionTypes.ON_USER_PASSWORD_UPDATE_SUCESS });
+    }).catch(err => {
+      console.log(err);
+      if (err.response.data.error) {
+        dispatch({ type: actionTypes.ON_USER_PASSWORD_UPDATE_FAIL, error: err.response.data.error });
+      }else {
+        dispatch({ type: actionTypes.ON_USER_PASSWORD_UPDATE_FAIL, error: err });
+      }
+      
+    })
+  }
+}

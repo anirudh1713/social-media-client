@@ -1,29 +1,30 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 
-import { makeStyles, ListItem, ListItemAvatar, ListItemText, Avatar, 
-          ListItemSecondaryAction, IconButton } 
+import { ListItem, ListItemAvatar, ListItemText, Avatar, 
+          ListItemSecondaryAction, IconButton }
 from '@material-ui/core';
+//import { makeStyles } from '@material-ui/core';
 import CheckIcon from '@material-ui/icons/Check';
 import CloseIcon from '@material-ui/icons/Close';
 
-const useStyles = makeStyles({
-  linkClass: {
-    textDecoration: 'none',
-    color: 'inherit',
-    '&:link': {
-      textDecoration: 'none',
-      color: 'inherit'
-    },
-    '&:active': {
-      textDecoration: 'none',
-      color: 'inherit'
-    }
-  }
-});
+// const useStyles = makeStyles({
+//   linkClass: {
+//     textDecoration: 'none',
+//     color: 'inherit',
+//     '&:link': {
+//       textDecoration: 'none',
+//       color: 'inherit'
+//     },
+//     '&:active': {
+//       textDecoration: 'none',
+//       color: 'inherit'
+//     }
+//   }
+// });
 
 const UserSearch = (props) => {
-  const classes = useStyles();
+  //const classes = useStyles();
 
   return (
       <ListItem>

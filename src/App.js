@@ -19,9 +19,9 @@ import * as actions from './store/actions/index';
 const App = (props) => {
   const { onAutoSignin, onPostsLoad, onFriendsLoad, onSentReqLoad, onPendingReqLoad } = props;
 
+  const token = localStorage.getItem('token');
+  const userId = localStorage.getItem('userId');
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
     if (token && userId) {
       onAutoSignin(token, userId);
       onPostsLoad(token);
@@ -29,7 +29,7 @@ const App = (props) => {
       onSentReqLoad(token);
       onPendingReqLoad(token);
     }
-  }, [onAutoSignin, onPostsLoad, onFriendsLoad, onSentReqLoad, onPendingReqLoad]);
+  }, [onAutoSignin, onPostsLoad, onFriendsLoad, onSentReqLoad, onPendingReqLoad, token, userId]);
 
   /**************** LOGOUT ********************/
   const onLogoutHandler = () => {
@@ -55,20 +55,16 @@ const App = (props) => {
                   username={props.username}
                   onAcceptReq={props.onAcceptRequest}
                   onRejectReq={props.onRejectRequest}
-                  pendingRequests={props.pendingRequests}
+                  //pendingRequests={props.pendingRequests}
           /> : null 
         }
         <Switch>
           <Route path={'/signup'} component={Signup} />
           <Route path={'/signin'} component={Signin} />
-          {props.token ?
-            <>
-              <Route path={'/user/:id'} component={Profile} />  
-              <Route exact path={'/'} component={Feed} /> 
-            </> :
-            <Route exact path={'/'} component={Signup} />
-          }
-          <Route path="*" component={NotFound404} />
+          { props.token && <Route path={'/user/:id'} component={Profile} /> }
+          { props.token && <Route exact path={'/'} component={Feed} /> }
+          <Route exact path={'/'} component={Signup} />
+          <Route path={"*"} component={NotFound404} />
         </Switch>
     </ThemeProvider>
   );

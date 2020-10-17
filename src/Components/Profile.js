@@ -14,6 +14,7 @@ import Post from "./Post";
 import { Redirect } from "react-router-dom";
 import About from "./About";
 import UserDataUpdate from "./UserDataUpdate";
+import ChangePassword from "./ChangePassword";
 
 const useStyles = makeStyles(theme => ({
   profileImage: {
@@ -158,6 +159,7 @@ const Profile = (props) => {
       {props.username}
     </Avatar>
   );
+  let changeDetailsContent = null;
 
   //if users is the signedin user
   if (props.userId && profileUserId && +props.userId === +profileUserId) {
@@ -183,6 +185,24 @@ const Profile = (props) => {
             </Avatar>
           </IconButton>
         </label>
+      </>
+    );
+    changeDetailsContent = (
+      <>
+        <Grid item xs={6} style={{ marginTop: '10px' }}>
+          <UserDataUpdate username={props.username}
+                          dob={props.dob}
+                          gender={props.gender}
+                          email={props.email}
+                          token={token}
+                          onUpdateData={props.onUpdateData}
+          />
+        </Grid>
+        <Grid item xs={6} style={{marginTop: '10px'}}>
+          <ChangePassword onUpdatePassword={props.onUpdatePassword}
+                          token={token}
+          />
+        </Grid>
       </>
     );
   }
@@ -323,14 +343,8 @@ const Profile = (props) => {
                 { name: 'Gender', value: `${gender}` },
                 { name: 'Email', value: `${props.email}` }
               ]} />
-              <Grid item xs={6} style={{ marginTop: '10px' }}>
-                <UserDataUpdate username={props.username}
-                                dob={props.dob}
-                                gender={props.gender}
-                                email={props.email}
-                                token={token}
-                                onUpdateData={props.onUpdateData}
-                />
+              <Grid xs={12} item container spacing={3} direction="row" justify="center" alignItems="center">
+                {changeDetailsContent}
               </Grid>
             </>
           }
@@ -376,7 +390,8 @@ const mapDispatchToProps = dispatch => {
     onRejectRequest: (token, userId) => dispatch(actions.onRejectRequest(token, userId)),
     onRemoveFriend: (token, userId) => dispatch(actions.onRemoveFriend(token, userId)),
     onProfilePhotoChange: (profilePhoto, token) => dispatch(actions.addProfileImage(profilePhoto, token)),
-    onUpdateData: (data, token) => dispatch(actions.updateUserData(data, token))
+    onUpdateData: (data, token) => dispatch(actions.updateUserData(data, token)),
+    onUpdatePassword: (oldPass, newPass, token) => dispatch(actions.changePassword(oldPass, newPass, token))
   };
 };
 
