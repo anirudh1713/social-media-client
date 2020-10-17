@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import Comment from './Comment';
@@ -119,14 +119,27 @@ const Post = (props) => {
     setShowComments(prevState => {
       return !prevState;
     });
-  }
+  };
+
+  const [userProfilePhoto, setUserProfilePhoto] = useState(props.userProfilePhoto);
+  let [username, setUsername] = useState(props.username);
+
+  const { userId, postUserId, profilePhoto, profileUsername } = props;
+
+  useEffect(() => {
+    if (+postUserId === +userId) {
+      setUserProfilePhoto(profilePhoto);
+      setUsername(profileUsername);
+    }
+  }, [userId, postUserId, profilePhoto, profileUsername]);
+  
 
   return (
     <Card>
       <div className={classes.postHeader}>
         <Link to={`/user/${props.postUserId}`} className={classes.linkClass}>
-          <CardHeader avatar={<Avatar src={props.userProfilePhoto}>{props.username}</Avatar>}
-                      title={props.username}
+          <CardHeader avatar={<Avatar src={userProfilePhoto}>{username}</Avatar>}
+                      title={username}
                       subheader={props.postDate}
           />
         </Link>
@@ -177,7 +190,8 @@ const mapStateToProps = state => {
   return {
     userId: state.auth.userId,
     posts: state.posts.posts,
-    profilePhoto: state.profile.profilePhoto
+    profilePhoto: state.profile.profilePhoto,
+    profileUsername: state.profile.username
   };
 };
 
