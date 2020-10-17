@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import { withRouter, Route, Switch } from 'react-router-dom';
 import { connect } from 'react-redux';
 
@@ -37,10 +37,25 @@ const App = (props) => {
     props.history.push('/');
   };
 
+  const [muiTheme, setMuiTheme] = useState(true);
+
+  const onThemeChangeHandler = () => {
+    setMuiTheme((prevState) => {
+      return !prevState;
+    });
+  }
+
+  let applyTheme = 'dark';
+  if (muiTheme) {
+    applyTheme = 'dark';
+  }else {
+    applyTheme = 'light';
+  }
+
   /****************** MaterialUI THEME **************************/
   const theme = createMuiTheme({
     palette: {
-      type: 'dark'
+      type: applyTheme
     }
   });
 
@@ -55,6 +70,8 @@ const App = (props) => {
                   username={props.username}
                   onAcceptReq={props.onAcceptRequest}
                   onRejectReq={props.onRejectRequest}
+                  onThemeChange={onThemeChangeHandler}
+                  theme={muiTheme}
                   //pendingRequests={props.pendingRequests}
           /> : null 
         }
@@ -64,7 +81,7 @@ const App = (props) => {
           { props.token && <Route path={'/user/:id'} component={Profile} /> }
           { props.token && <Route exact path={'/'} component={Feed} /> }
           <Route exact path={'/'} component={Signup} />
-          <Route path={"*"} component={NotFound404} />
+          <Route component={NotFound404} />
         </Switch>
     </ThemeProvider>
   );

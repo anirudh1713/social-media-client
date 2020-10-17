@@ -171,7 +171,7 @@ const UserDataUpdate = (props) => {
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose} color="primary">
-              Disagree
+              Cancel
             </Button>
             <Button onClick={handleClose} type="submit" color="primary" autoFocus>
               Submit

@@ -132,7 +132,7 @@ const ChangePassword = (props) => {
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose} color="primary">
-              Disagree
+              Cancel
             </Button>
             <Button onClick={handleClose} disabled={disabled} type="submit" color="primary" autoFocus>
               Submit
