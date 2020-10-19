@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { connect } from 'react-redux';
+import * as actionTypes from '../store/actions/actionTypes';
 
 import * as validators from '../Validators/Validators';
 
@@ -11,6 +13,13 @@ import { TextField, Grid, FormControl, Radio, FormLabel, FormControlLabel, Radio
 
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import DateFnsUtils from "@date-io/date-fns";
+import MuiAlert from '@material-ui/lab/Alert';
+import { Snackbar } from '@material-ui/core';
+
+//material ui alert
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 const useStyles = makeStyles({
   genderStyle: {
@@ -97,8 +106,38 @@ const UserDataUpdate = (props) => {
     }
   }
 
+  const onErrorCloseHandler = () => {
+    props.onErrorClose();
+  };
+
+  const onSuccessCloseHandler = () => {
+    props.onSuccessClose();
+  }
+
   return (
     <>
+      {props.error ?
+        <Snackbar open={props.error ? true : false} 
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                  autoHideDuration={4000} 
+                  onClose={onErrorCloseHandler}
+        >
+          <Alert onClose={onErrorCloseHandler} severity={"error"}>
+            {"Something wrong happened."}
+          </Alert>
+        </Snackbar> : null
+      } 
+      {props.success ?
+        <Snackbar open={props.success ? true : false} 
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                  autoHideDuration={4000} 
+                  onClose={onSuccessCloseHandler}
+        >
+          <Alert onClose={onSuccessCloseHandler} severity={"success"}>
+            {"Your infomation is updated."}
+          </Alert>
+        </Snackbar> : null
+      }
       <Button fullWidth onClick={handleClickOpen} variant="outlined">Edit information</Button>
       <Dialog open={open}
               onClose={handleClose}
@@ -183,4 +222,18 @@ const UserDataUpdate = (props) => {
   );
 };
 
-export default UserDataUpdate;
+const mapStateToProps = state => {
+  return {
+    error: state.profile.dataUpdateError,
+    success: state.profile.dataUpdateSuccess
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    onErrorClose: () => dispatch({ type: actionTypes.ON_USER_DATA_UPDATE_ERROR_CLEAR }),
+    onSuccessClose: () => dispatch({ type: actionTypes.ON_USER_DATA_UPDATE_SUCCESS_CLEAR })
+  }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(UserDataUpdate);

@@ -373,7 +373,7 @@ const mapStateToProps = state => {
     profilePhoto: state.profile.profilePhoto,
     posts: state.posts.posts,
     userLoading: state.profile.userLoading,
-    postLoading: state.posts.loading,
+    postLoading: state.posts.postLoadLoading,
     sentRequests: state.friends.sentRequests,
     friends: state.friends.friends,
     pendingRequests: state.friends.pendingRequests,

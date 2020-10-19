@@ -117,7 +117,8 @@ const reducer = (state = initialState, action) => {
         pendingRequests: state.pendingRequests.filter(req => {
           return req.userUserId !== action.newFriend.userUserId;
         }),
-        error: null
+        error: null,
+        loading: false
       }
     case actionTypes.ON_FRIEND_REQ_ACCEPT_FAIL:
       return {

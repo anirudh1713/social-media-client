@@ -128,8 +128,10 @@ const Post = (props) => {
 
   useEffect(() => {
     if (+postUserId === +userId) {
-      setUserProfilePhoto(profilePhoto);
-      setUsername(profileUsername);
+      if (profilePhoto && profileUsername) {
+        setUserProfilePhoto(profilePhoto);
+        setUsername(profileUsername);
+      }
     }
   }, [userId, postUserId, profilePhoto, profileUsername]);
   
