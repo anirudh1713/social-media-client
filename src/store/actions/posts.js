@@ -37,8 +37,10 @@ export const addPost = (token, formData) => {
       console.log(err.response);
       if (err.response.data.error.message) {
         dispatch({ type: actionTypes.ON_ADD_POST_FAIL, error: err.response.data.error.message });
+      }else if(err.response.data.error) {
+        dispatch({ type: actionTypes.ON_ADD_POST_FAIL, error: err.response.data.error });
       }else {
-        dispatch({ type: actionTypes.ON_ADD_POST_FAIL, error: err });
+        dispatch({ type: actionTypes.ON_ADD_POST_FAIL, error: 'unexpected error.' });
       }
     });
   };

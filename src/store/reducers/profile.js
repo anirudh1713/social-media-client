@@ -13,7 +13,9 @@ const initialState = {
   dataUpdateSuccess: false,
   passwordChangeLoading: true,
   passwordChangeError: null,
-  passwordChangeSuccess: false
+  passwordChangeSuccess: false,
+  profilePhotoSuccess: false,
+  profilePhotoError: null
 };
 
 const reducer = (state = initialState, action) => {
@@ -47,12 +49,23 @@ const reducer = (state = initialState, action) => {
     case actionTypes.ON_ADD_PROFILE_IMAGE_SUCCESS:
       return {
         ...state,
-        profilePhoto: action.profileImage
+        profilePhoto: action.profileImage,
+        profilePhotoSuccess: true
       }
     case actionTypes.ON_ADD_PROFILE_IMAGE_FAIL:
       return {
         ...state,
-        profileImageError: action.error
+        profilePhotoError: action.error
+      }
+    case actionTypes.ON_ADD_PROFILE_IMAGE_SUCCESS_CLEAR:
+      return {
+        ...state,
+        profilePhotoSuccess: false
+      }
+    case actionTypes.ON_ADD_PROFILE_IMAGE_ERROR_CLEAR:
+      return {
+        ...state,
+        profilePhotoError: null
       }
     case actionTypes.ON_USER_DATA_UPDATE_START:
       return {

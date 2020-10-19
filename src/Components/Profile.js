@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import { connect } from 'react-redux';
 import * as actions from '../store/actions/index';
 import moment from 'moment';
+import * as actionTypes from '../store/actions/actionTypes';
 
 import {
   Grid, Avatar, Typography, makeStyles, LinearProgress, Button, IconButton, Tabs, Tab
 } from '@material-ui/core';
 import GroupAddIcon from '@material-ui/icons/GroupAdd';
 import PersonAddDisabledIcon from '@material-ui/icons/PersonAddDisabled';
+import MuiAlert from '@material-ui/lab/Alert';
+import { Snackbar } from '@material-ui/core';
 
 import CreatePost from '../Containers/CreatePost/CreatePost';
 import Post from "./Post";
@@ -15,6 +18,11 @@ import { Redirect } from "react-router-dom";
 import About from "./About";
 import UserDataUpdate from "./UserDataUpdate";
 import ChangePassword from "./ChangePassword";
+
+//material ui alert
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 const useStyles = makeStyles(theme => ({
   profileImage: {
@@ -354,9 +362,41 @@ const Profile = (props) => {
     );
   }
 
+  /*************** SnackBar Close *******************/
+  const onErrorCloseHandler = () => {
+    props.onProfilePhotoErrorClear();
+    
+  };
+
+  const onSuccessCloseHandler = () => {
+    props.onProfilePhotoSuccessClear();
+  }
+
   return (
     <>
       {props.token ? null : <Redirect to={'/signup'} />}
+      {props.profilePhotoError ?
+        <Snackbar open={props.profilePhotoError ? true : false} 
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                  autoHideDuration={4000} 
+                  onClose={onErrorCloseHandler}
+        >
+          <Alert onClose={onErrorCloseHandler} severity={"error"}>
+            {props.profilePhotoError}
+          </Alert>
+        </Snackbar> : null
+      } 
+      {props.profilePhotoSuccess ?
+        <Snackbar open={props.profilePhotoSuccess ? true : false} 
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                  autoHideDuration={4000} 
+                  onClose={onSuccessCloseHandler}
+        >
+          <Alert onClose={onSuccessCloseHandler} severity={"success"}>
+            {"Profile photo added."}
+          </Alert>
+        </Snackbar> : null
+      }
       {content}
     </>
   );
@@ -378,7 +418,9 @@ const mapStateToProps = state => {
     friends: state.friends.friends,
     pendingRequests: state.friends.pendingRequests,
     friendsLoading: state.friends.loading,
-    email: state.profile.email
+    email: state.profile.email,
+    profilePhotoSuccess: state.profile.profilePhotoSuccess,
+    profilePhotoError: state.profile.profilePhotoError
   };
 };
 
@@ -391,7 +433,9 @@ const mapDispatchToProps = dispatch => {
     onRemoveFriend: (token, userId) => dispatch(actions.onRemoveFriend(token, userId)),
     onProfilePhotoChange: (profilePhoto, token) => dispatch(actions.addProfileImage(profilePhoto, token)),
     onUpdateData: (data, token) => dispatch(actions.updateUserData(data, token)),
-    onUpdatePassword: (oldPass, newPass, token) => dispatch(actions.changePassword(oldPass, newPass, token))
+    onUpdatePassword: (oldPass, newPass, token) => dispatch(actions.changePassword(oldPass, newPass, token)),
+    onProfilePhotoSuccessClear: () => dispatch({ type: actionTypes.ON_ADD_PROFILE_IMAGE_SUCCESS_CLEAR }),
+    onProfilePhotoErrorClear: () => dispatch({ type: actionTypes.ON_ADD_PROFILE_IMAGE_ERROR_CLEAR })
   };
 };
 

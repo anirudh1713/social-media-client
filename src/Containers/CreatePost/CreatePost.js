@@ -39,11 +39,11 @@ const CreatePost = (props) => {
 
   const classes = useStyles();
 
-  const { success } = props;
+  const { success, error } = props;
 
   /************ clear input when post is complete ****************/
   useEffect(() => {
-    if (success) {
+    if (success || error) {
       setDescription({
         value: "",
         valid: true,
@@ -54,7 +54,7 @@ const CreatePost = (props) => {
         imagePreviewUrl: ""
       });
     }
-  }, [success]);
+  }, [success, error]);
 
   /*********** submit handler to CREATE POST ***************/
   const onSubmitHandler = (e) => {

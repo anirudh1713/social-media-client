@@ -36,7 +36,13 @@ export const addProfileImage = (profileImage, token) => {
       dispatch({ type: actionTypes.ON_ADD_PROFILE_IMAGE_SUCCESS, profileImage: res.data.profile_url });
     }).catch(err => {
       console.log(err);
-      dispatch({ type: actionTypes.ON_ADD_PROFILE_IMAGE_FAIL, error: err.response.data.error });
+      if (err.response.data.error.message) {
+        dispatch({ type: actionTypes.ON_ADD_POST_FAIL, error: err.response.data.error.message });
+      }else if(err.response.data.error) {
+        dispatch({ type: actionTypes.ON_ADD_POST_FAIL, error: err.response.data.error });
+      }else {
+        dispatch({ type: actionTypes.ON_ADD_POST_FAIL, error: 'unexpected error.' });
+      }
     })
   }
 }
