@@ -152,9 +152,11 @@ const Profile = (props) => {
     );
   } else {
     postContent = (
-      <Typography variant="h4" color="secondary" style={{ margin: "15px", fontWeight: "600", letterSpacing: "2px" }}>
-        User has no posts!
-      </Typography>
+      <Grid item xs={12}>
+        <Typography variant="h4" color="secondary" style={{ margin: "15px", fontWeight: "600", letterSpacing: "2px" }}>
+          User has no posts!
+        </Typography>
+      </Grid>
     );
   }
 
