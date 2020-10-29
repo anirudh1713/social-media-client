@@ -2,12 +2,16 @@ import * as actionTypes from './actionTypes';
 import axios from 'axios';
 
 /*****************LOAD POST***************************/
-export const postsLoad = (token) => {
+export const postsLoad = (token, limit, offset) => {
   return dispatch => {
-    dispatch({ type: actionTypes.ON_POST_LOAD_START });
+    //dispatch({ type: actionTypes.ON_POST_LOAD_START });
     axios.get(`http://localhost:30001/posts`, {
       headers: {
         Authorization: `Bearer ${token}`
+      },
+      params: {
+        limit,
+        offset
       }
     }).then(res => {
       dispatch({

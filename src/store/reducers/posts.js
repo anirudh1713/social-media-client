@@ -11,7 +11,9 @@ const initialState = {
   likeError: null,
   commentLoading: false,
   commentSuccess: false,
-  commentError: null
+  commentError: null,
+  limit: 5,
+  page: 0
 };
 
 const updatedArr = (arr) => {
@@ -37,6 +39,12 @@ const updatedArr = (arr) => {
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
+    case actionTypes.ON_PAGE_INC:
+      return {
+        ...state,
+        posts: updatedArr(state.posts),
+        page: state.page + 1
+      };
     case actionTypes.ON_POST_LOAD_START:
       return {
         ...state,
@@ -44,9 +52,13 @@ const reducer = (state = initialState, action) => {
         postLoadError: null
       };
     case actionTypes.ON_POST_LOAD_SUCCESS:
+      let initialPost = [];
+      if (state.posts) {
+        initialPost = [...state.posts];
+      }
       return {
         ...state,
-        posts: action.posts,
+        posts: [...initialPost, ...action.posts],
         postLoadLoading: false,
         postLoadError: null
       };
