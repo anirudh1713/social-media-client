@@ -56,9 +56,23 @@ const reducer = (state = initialState, action) => {
       if (state.posts) {
         initialPost = [...state.posts];
       }
+      initialPost = [...initialPost, ...action.posts];
+      let cleanPosts = [...initialPost];
+      if (initialPost.length > 0) {
+        cleanPosts = initialPost.reduce((acc, current) => {
+          const x = acc.find(item => {
+            return item.post_id === current.post_id;
+          });
+          if(!x) {
+            return acc.concat(current);
+          }else {
+            return acc;
+          }
+        }, []);
+      }
       return {
         ...state,
-        posts: [...initialPost, ...action.posts],
+        posts: cleanPosts,
         postLoadLoading: false,
         postLoadError: null
       };
