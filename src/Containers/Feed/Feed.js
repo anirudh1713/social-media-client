@@ -1,11 +1,16 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from 'react-redux';
 import moment from 'moment';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
-import { Grid, makeStyles, LinearProgress, Typography } from "@material-ui/core";
+import CircularProgress from '@material-ui/core/CircularProgress';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import { Grid, makeStyles, Typography } from "@material-ui/core";
 
 import CreatePost from "../CreatePost/CreatePost";
 import Post from '../../Components/Post';
+import * as actions from '../../store/actions/index';
+import * as actionTypes from '../../store/actions/actionTypes';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -28,6 +33,28 @@ const useStyles = makeStyles((theme) => ({
 const Feed = (props) => {
   const classes = useStyles();
 
+  const [ hasMore, setHasMore ] = useState(true);
+
+  const { onFetchPosts, token, error, page, limit } = props;
+
+  //const limit = 5;
+  //let offset = limit * page;
+
+  useEffect(() => {
+    onFetchPosts(token, limit, page);
+  }, [onFetchPosts, token, page, limit]);
+
+  useEffect(() => {
+    if (error) {
+      setHasMore(false);
+    }
+  }, [error]);
+
+  //scroll loader
+  const loading = (
+    <CircularProgress />
+  );
+
   //FOR LOADING
   let feedContent = (
     <div className={classes.rootLoading}>
@@ -37,8 +64,12 @@ const Feed = (props) => {
 
   let allPosts = null;
   //CHANGE IF LOADED
+
+  //post loading
+  let postLoading = null;
   
-  if (props.posts &&!props.loading && props.posts.length > 0) {
+  //&&!props.loading
+  if (props.posts && props.posts.length > 0) {
     //ALL POSTS RENDER
     allPosts = props.posts.map(post => {
       let postDate = moment(post.createdAt).format("MMM Do YYYY");
@@ -63,18 +94,38 @@ const Feed = (props) => {
 
     //RENDER MAIN FEED CONTENT
     feedContent = (
-      <Grid container className={classes.root}>
-        <Grid item container xs={3} />
-        <Grid item container xs={6} className={classes.createPost}>
-          <Grid item xs={12}>
-            <CreatePost />
+      <>
+        {postLoading}
+        <Grid container className={classes.root}>
+          <Grid item container xs={3} />
+          <Grid item container xs={6} className={classes.createPost}>
+            <Grid item xs={12}>
+              <CreatePost />
+            </Grid>
+            <Grid item xs={12}>
+              <InfiniteScroll dataLength={props.posts.length}
+                              next={() => props.onPageInc()}
+                              hasMore={hasMore}
+                              loader={loading}
+                              endMessage={
+                                <p style={{ textAlign: 'center' }}>
+                                  <b>You have seen it all</b>
+                                </p>
+                              }
+                              style={{overflow: 'hidden'}}
+              >
+                {allPosts}
+              </InfiniteScroll>
+            </Grid>
           </Grid>
-          {allPosts}
+          <Grid item xs={3} />
         </Grid>
-        <Grid item xs={3} />
-      </Grid>
+      </>
     );
   }else {
+    // postLoading = (
+    //   <LinearProgress />
+    // );
     feedContent = (
       <Grid container className={classes.root}>
         <Grid item container xs={3} />
@@ -103,8 +154,17 @@ const mapStateToProps = state => {
     token: state.auth.token,
     posts: state.posts.posts,
     loading: state.posts.loading,
-    error: state.posts.error
-  }
+    error: state.posts.postLoadError,
+    limit: state.posts.limit,
+    page: state.posts.page
+  };
 };
 
-export default connect(mapStateToProps)(Feed);
+const mapDispatchToProps = dispatch => {
+  return {
+    onFetchPosts: (token, limit, offset) => dispatch(actions.postsLoad(token, limit, offset)),
+    onPageInc: () => dispatch({ type: actionTypes.ON_PAGE_INC })
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Feed);

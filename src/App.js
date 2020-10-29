@@ -17,19 +17,18 @@ import * as actionTypes from './store/actions/actionTypes';
 import * as actions from './store/actions/index';
 
 const App = (props) => {
-  const { onAutoSignin, onPostsLoad, onFriendsLoad, onSentReqLoad, onPendingReqLoad } = props;
+  const { onAutoSignin, onFriendsLoad, onSentReqLoad, onPendingReqLoad } = props;
 
   const token = localStorage.getItem('token');
   const userId = localStorage.getItem('userId');
   useEffect(() => {
     if (token && userId) {
       onAutoSignin(token, userId);
-      onPostsLoad(token);
       onFriendsLoad(token);
       onSentReqLoad(token);
       onPendingReqLoad(token);
     }
-  }, [onAutoSignin, onPostsLoad, onFriendsLoad, onSentReqLoad, onPendingReqLoad, token, userId]);
+  }, [onAutoSignin, onFriendsLoad, onSentReqLoad, onPendingReqLoad, token, userId]);
 
   /**************** LOGOUT ********************/
   const onLogoutHandler = () => {
@@ -99,7 +98,6 @@ const mapDispatchToProps = dispatch => {
   return {
     onAutoSignin: (token, userId) => dispatch({ type: actionTypes.ON_AUTH_SUCCESS, token, userId }),
     onLogout: (token) => dispatch(actions.logout(token)),
-    onPostsLoad: (token) => dispatch(actions.postsLoad(token)),
     onFriendsLoad: (token) => dispatch(actions.friendsLoad(token)),
     onSentReqLoad: (token) => dispatch(actions.onSentRequestLoad(token)),
     onPendingReqLoad: (token) => dispatch(actions.onPendingRequestLoad(token)),
